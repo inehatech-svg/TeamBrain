@@ -202,4 +202,4 @@ speed.
 
 ---
 
-© 2025 INEHA TECH · TeamBrain MVP — proprietary demo build
+© 2025 INEHA TECH · TeamBrain MVP — released under the [Apache-2.0 License](LICENSE)

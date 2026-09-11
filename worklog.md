@@ -152,3 +152,19 @@ Work Log:
 
 Stage Summary:
 - README.md created and committed; repo is push-ready with remote configured. Push itself is blocked solely on missing GitHub credentials — needs a Personal Access Token from the user (or the user running the push themselves). download/teambrain.bundle contains a complete portable copy of the repository.
+
+---
+Task ID: 9
+Agent: main (Z.ai Code)
+Task: Complete the GitHub push using the user-provided Personal Access Token.
+
+Work Log:
+- User supplied a PAT (verified via GET /user — account inehatech-svg; token NOT persisted to any file).
+- POST /user/repos failed "name already exists" → user had just created inehatech-svg/TeamBrain (public, default branch main, auto-init: Apache-2.0 LICENSE + 1-line README stub).
+- Fetched origin/main (524f895); merged unrelated histories with --allow-unrelated-histories -X ours → their LICENSE preserved, our full README replaces the stub; all prior commit SHAs (incl. 531cac6 / 4d5c568 referenced above) unchanged.
+- Aligned README footer with the Apache-2.0 license; committed demo-DB drift from the background re-index scheduler.
+- Pushed main to https://github.com/inehatech-svg/TeamBrain.git via token-in-URL (one-shot; remote URL kept clean, no secret stored in config).
+- Verified push via API (commit list / repo state).
+
+Stage Summary:
+- TeamBrain is live on GitHub at inehatech-svg/TeamBrain (public). History: user's init commit (LICENSE) + full MVP history + README/worklog commits, joined by a merge commit. Token used only for auth, never written to disk; user advised to revoke it since it was shared in chat.
