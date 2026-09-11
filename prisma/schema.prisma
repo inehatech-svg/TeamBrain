@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// TeamBrain — permission-aware internal knowledge copilot (demo workspace)
+
+model User {
+  id        String        @id @default(cuid())
+  email     String        @unique
+  name      String
+  role      String        // ADMIN | MEMBER (app-level role: admins manage sources & see insights)
+  title     String        // e.g. "Managing Partner"
+  initials  String
+  createdAt DateTime      @default(now())
+  queries   QueryLog[]
+  messages  ChatMessage[]
+}
+
+model Source {
+  id              String      @id @default(cuid())
+  provider        String      // GDRIVE | UPLOAD
+  name            String
+  status          String      // CONNECTED | SYNCING | DISCONNECTED
+  accountEmail    String?
+  scopeNote       String?     // OAuth scopes granted (display)
+  autoSyncMinutes Int         @default(10)
+  lastSyncedAt    DateTime?
+  createdAt       DateTime    @default(now())
+  files           DriveFile[]
+  syncJobs        SyncJob[]
+}
+
+model DriveFile {
+  id          String        @id @default(cuid())
+  sourceId    String
+  source      Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  driveId     String        @unique
+  name        String
+  path        String        // e.g. /Policies/Expense Reimbursement Policy.pdf
+  mimeType    String
+  ownerEmail  String        // Drive owner
+  visibility  String        // EVERYONE (org-wide) | RESTRICTED (owner + sharedWith only)
+  sharedWith  String        @default("") // comma-separated emails (mirrors Drive sharing)
+  sizeKb      Float         @default(0)
+  modifiedAt  DateTime      @default(now())
+  content     String        // full extracted text (simulated extraction)
+  createdAt   DateTime      @default(now())
+  chunks      Chunk[]
+
+  @@index([sourceId])
+}
+
+model Chunk {
+  id        String    @id @default(cuid())
+  fileId    String
+  file      DriveFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  idx       Int
+  section   String    // heading/section the chunk belongs to
+  content   String
+  embedding String    // JSON { "term": weight } sparse TF-IDF vector (demo; production: pgvector)
+  createdAt DateTime  @default(now())
+
+  @@index([fileId])
+}
+
+model QueryLog {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  query            String
+  status           String    // ANSWERED | NOT_FOUND | ERROR
+  confidence       Float     @default(0) // 0..1 retrieval confidence
+  citationFileIds  String    @default("[]") // JSON array of file ids
+  excludedChunks   Int       @default(0) // chunks filtered out by permission enforcement
+  latencyMs        Int       @default(0)
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String   // user | assistant
+  content        String
+  citations      String   @default("[]") // JSON: [{fileId,name,path,snippet,mimeType,ownerEmail,visibility,sharedWith}]
+  status         String?  // ANSWERED | NOT_FOUND
+  excludedChunks Int      @default(0)
+  confidence     Float    @default(0)
+  latencyMs      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model SyncJob {
+  id             String    @id @default(cuid())
+  sourceId       String
+  source         Source    @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status         String    // RUNNING | COMPLETED | FAILED
+  trigger        String    // MANUAL | SCHEDULED | OAUTH_CONNECT | UPLOAD
+  filesProcessed Int       @default(0)
+  chunksIndexed  Int       @default(0)
+  message        String?
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+}
