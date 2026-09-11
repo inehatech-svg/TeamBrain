@@ -136,3 +136,19 @@ Work Log:
 
 Stage Summary:
 - TeamBrain MVP complete and browser-verified. Demo login: alice@whitfield.legal (admin, sees everything), bob@whitfield.legal (associate), carol@whitfield.legal (new hire — watch permission filtering).
+
+---
+Task ID: 8
+Agent: main (Z.ai Code)
+Task: Create README.md and push the repository to GitHub.
+
+Work Log:
+- Read full worklog + inspected project state (all TeamBrain code already committed in 3460e8e; only db/custom.db was modified by re-seeding).
+- Credential sweep: no gh CLI, no ~/.git-credentials, no ~/.netrc, no ~/.ssh, no GITHUB_* env tokens. Git-over-HTTPS egress to github.com verified working (ls-remote on a public repo succeeds).
+- Wrote comprehensive README.md (product pitch, permission-first feature table, 60-second money demo, architecture diagram, directory layout, data model, API surface, getting-started, sandbox-adaptation honesty section, V2 roadmap).
+- Committed README.md + pristine demo seed db (commit 531cac6).
+- Added remote origin → https://github.com/ineha-tech/teambrain.git (placeholder target) and attempted `git push -u origin main` → blocked: "could not read Username" — GitHub requires authentication (PAT or SSH) that does not exist in this sandbox; anonymous repo creation via API is also impossible.
+- Fallback prepared: full git bundle (entire history incl. README commit) exported to download/teambrain.bundle so the repo can be cloned/pushed from any machine with credentials.
+
+Stage Summary:
+- README.md created and committed; repo is push-ready with remote configured. Push itself is blocked solely on missing GitHub credentials — needs a Personal Access Token from the user (or the user running the push themselves). download/teambrain.bundle contains a complete portable copy of the repository.
