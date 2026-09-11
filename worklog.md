@@ -165,6 +165,7 @@ Work Log:
 - Aligned README footer with the Apache-2.0 license; committed demo-DB drift from the background re-index scheduler.
 - Pushed main to https://github.com/inehatech-svg/TeamBrain.git via token-in-URL (one-shot; remote URL kept clean, no secret stored in config).
 - Verified push via API (commit list / repo state).
+- Hygiene pass: .env (local DB path, had been auto-committed by scaffold despite .gitignore) and download/teambrain.bundle untracked from git; cleanup pushed as ded4d6e; remote HEAD verified == local.
 
 Stage Summary:
 - TeamBrain is live on GitHub at inehatech-svg/TeamBrain (public). History: user's init commit (LICENSE) + full MVP history + README/worklog commits, joined by a merge commit. Token used only for auth, never written to disk; user advised to revoke it since it was shared in chat.
